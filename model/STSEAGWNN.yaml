@@ -1,0 +1,31 @@
+STSEAGWNN_INRIX_MANHATTAN:
+  num_nodes: 1212
+  in_steps: 12
+  out_steps: 1
+
+  train_size: 0.6
+  val_size: 0.2
+
+  time_of_day: False
+  day_of_week: False
+
+  lr: 0.001
+  weight_decay: 0.0015
+  milestones: [25, 45, 65]
+  lr_decay_rate: 1
+  batch_size: 8
+  max_epochs: 300
+  early_stop: 30
+  use_cl: False
+  cl_step_size: 2500
+
+  model_args:
+    in_channels: 2
+    out_channels: 12
+    residual_channels: 40
+    dilation_channels: 40
+    skip_channels: 320
+    end_channels: 640
+    kernel_size: 2
+    blocks: 2
+    layers: 2
