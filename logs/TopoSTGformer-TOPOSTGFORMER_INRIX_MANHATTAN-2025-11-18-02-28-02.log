@@ -1,0 +1,146 @@
+TOPOSTGFORMER_INRIX_MANHATTAN
+Trainset:	x-(63051, 1212, 12, 1)	y-(63051, 1212, 12, 1)
+Valset:  	x-(21017, 1212, 12, 1)  	y-(21017, 1212, 12, 1)
+Testset:	x-(21017, 1212, 12, 1)	y-(21017, 1212, 12, 1)
+
+--------- TopoSTGformer ---------
+{
+    "num_nodes": 1212,
+    "in_steps": 12,
+    "out_steps": 12,
+    "train_size": 0.6,
+    "val_size": 0.2,
+    "time_of_day": false,
+    "day_of_week": false,
+    "lr": 0.001,
+    "weight_decay": 0.005,
+    "milestones": [
+        20,
+        40,
+        60,
+        80,
+        100,
+        120,
+        140,
+        160
+    ],
+    "warmup_epochs": 3,
+    "lr_decay_rate": 0.25,
+    "batch_size": 16,
+    "max_epochs": 300,
+    "early_stop": 30,
+    "use_cl": false,
+    "cl_step_size": 2500,
+    "motifs": [
+        "3-stars",
+        "4-stars",
+        "4-cycles"
+    ],
+    "model_args": {
+        "num_nodes": 1212,
+        "in_steps": 12,
+        "out_steps": 12,
+        "steps_per_day": 288,
+        "input_dim": 1,
+        "output_dim": 1,
+        "input_embedding_dim": 24,
+        "tod_embedding_dim": 0,
+        "dow_embedding_dim": 0,
+        "adaptive_embedding_dim": 12,
+        "kernel_size": [
+            1
+        ],
+        "num_heads": 4,
+        "num_layers": 6,
+        "dropout": 0.1,
+        "dropout_a": 0.35
+    }
+}
+====================================================================================================
+Layer (type:depth-idx)                             Output Shape              Param #
+====================================================================================================
+TopoSTGformer                                      [16, 12, 1212, 1]         174,528
+├─Linear: 1-1                                      [16, 12, 1212, 24]        48
+├─MotifTopoEncoder: 1-2                            [1212, 7]                 --
+├─Dropout: 1-3                                     [16, 12, 1212, 12]        --
+├─Conv2d: 1-4                                      [16, 36, 1212, 12]        1,332
+├─AvgPool2d: 1-5                                   [1212, 1212, 12]          --
+├─ModuleList: 1-6                                  --                        --
+│    └─SelfAttentionLayer: 2-1                     [16, 12, 1212, 36]        --
+│    │    └─GraphPropagate: 3-1                    [16, 12, 1212, 36]        --
+│    │    └─ModuleList: 3-4                        --                        (recursive)
+│    │    └─ModuleList: 3-5                        --                        (recursive)
+│    │    └─ModuleList: 3-4                        --                        (recursive)
+│    │    └─ModuleList: 3-5                        --                        (recursive)
+│    │    └─Dropout: 3-6                           [16, 12, 1212, 36]        --
+│    │    └─LayerNorm: 3-7                         [16, 12, 1212, 36]        72
+│    │    └─Mlp: 3-8                               [16, 12, 1212, 36]        5,292
+│    │    └─Dropout: 3-9                           [16, 12, 1212, 36]        --
+│    │    └─LayerNorm: 3-10                        [16, 12, 1212, 36]        72
+├─Linear: 1-7                                      [16, 1212, 36]            15,588
+├─ModuleList: 1-8                                  --                        --
+│    └─Mlp: 2-2                                    [16, 1212, 36]            --
+│    │    └─Linear: 3-11                           [16, 1212, 72]            2,664
+│    │    └─ReLU: 3-12                             [16, 1212, 72]            --
+│    │    └─Dropout: 3-13                          [16, 1212, 72]            --
+│    │    └─Identity: 3-14                         [16, 1212, 72]            --
+│    │    └─Linear: 3-15                           [16, 1212, 36]            2,628
+│    │    └─Dropout: 3-16                          [16, 1212, 36]            --
+│    └─Mlp: 2-3                                    [16, 1212, 36]            --
+│    │    └─Linear: 3-17                           [16, 1212, 72]            2,664
+│    │    └─ReLU: 3-18                             [16, 1212, 72]            --
+│    │    └─Dropout: 3-19                          [16, 1212, 72]            --
+│    │    └─Identity: 3-20                         [16, 1212, 72]            --
+│    │    └─Linear: 3-21                           [16, 1212, 36]            2,628
+│    │    └─Dropout: 3-22                          [16, 1212, 36]            --
+│    └─Mlp: 2-4                                    [16, 1212, 36]            --
+│    │    └─Linear: 3-23                           [16, 1212, 72]            2,664
+│    │    └─ReLU: 3-24                             [16, 1212, 72]            --
+│    │    └─Dropout: 3-25                          [16, 1212, 72]            --
+│    │    └─Identity: 3-26                         [16, 1212, 72]            --
+│    │    └─Linear: 3-27                           [16, 1212, 36]            2,628
+│    │    └─Dropout: 3-28                          [16, 1212, 36]            --
+│    └─Mlp: 2-5                                    [16, 1212, 36]            --
+│    │    └─Linear: 3-29                           [16, 1212, 72]            2,664
+│    │    └─ReLU: 3-30                             [16, 1212, 72]            --
+│    │    └─Dropout: 3-31                          [16, 1212, 72]            --
+│    │    └─Identity: 3-32                         [16, 1212, 72]            --
+│    │    └─Linear: 3-33                           [16, 1212, 36]            2,628
+│    │    └─Dropout: 3-34                          [16, 1212, 36]            --
+│    └─Mlp: 2-6                                    [16, 1212, 36]            --
+│    │    └─Linear: 3-35                           [16, 1212, 72]            2,664
+│    │    └─ReLU: 3-36                             [16, 1212, 72]            --
+│    │    └─Dropout: 3-37                          [16, 1212, 72]            --
+│    │    └─Identity: 3-38                         [16, 1212, 72]            --
+│    │    └─Linear: 3-39                           [16, 1212, 36]            2,628
+│    │    └─Dropout: 3-40                          [16, 1212, 36]            --
+│    └─Mlp: 2-7                                    [16, 1212, 36]            --
+│    │    └─Linear: 3-41                           [16, 1212, 72]            2,664
+│    │    └─ReLU: 3-42                             [16, 1212, 72]            --
+│    │    └─Dropout: 3-43                          [16, 1212, 72]            --
+│    │    └─Identity: 3-44                         [16, 1212, 72]            --
+│    │    └─Linear: 3-45                           [16, 1212, 36]            2,628
+│    │    └─Dropout: 3-46                          [16, 1212, 36]            --
+├─Linear: 1-9                                      [16, 1212, 12]            444
+====================================================================================================
+Total params: 246,194
+Trainable params: 246,194
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 319.29
+====================================================================================================
+Input size (MB): 0.93
+Forward/backward pass size (MB): 1493.03
+Params size (MB): 0.29
+Estimated Total Size (MB): 1494.25
+====================================================================================================
+
+Loss: MaskedMAELoss
+
+2025-11-18 02:31:11.168093 Epoch 1  	Train Loss = 4.56748 Val Loss = 4.13122 Test Loss = 4.13245
+2025-11-18 02:34:05.240383 Epoch 2  	Train Loss = 4.18088 Val Loss = 4.09332 Test Loss = 4.09463
+2025-11-18 02:36:59.480743 Epoch 3  	Train Loss = 4.14809 Val Loss = 4.11659 Test Loss = 4.11779
+2025-11-18 02:39:52.223106 Epoch 4  	Train Loss = 4.12099 Val Loss = 4.09367 Test Loss = 4.09491
+2025-11-18 02:42:45.653170 Epoch 5  	Train Loss = 4.10801 Val Loss = 4.09593 Test Loss = 4.09696
+2025-11-18 02:45:39.999387 Epoch 6  	Train Loss = 4.10011 Val Loss = 4.04806 Test Loss = 4.04915
+2025-11-18 02:48:37.111405 Epoch 7  	Train Loss = 4.09584 Val Loss = 4.04812 Test Loss = 4.04915
+2025-11-18 02:51:37.986739 Epoch 8  	Train Loss = 4.09352 Val Loss = 4.05515 Test Loss = 4.05695
