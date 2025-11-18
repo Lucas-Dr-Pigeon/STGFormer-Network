@@ -477,3 +477,4 @@ def prop_graph_bce_loss(_pos_logits, _neg_logits, batch_x, batch_y, SCALER, A_ma
     pos_bce = bce_loss(_pos_logits, _pos_edge.to(torch.float32))
     neg_bce = bce_loss(_neg_logits, _neg_edge.to(torch.float32))
     return pos_bce + neg_bce
+
