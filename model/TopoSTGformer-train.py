@@ -323,10 +323,10 @@ if __name__ == "__main__":
     if 'INRIX' in args.dataset:
         (trainset_loader, valset_loader, testset_loader, SCALER, adj_mx, gdf, _) = (
             load_inrix_data_with_details(
-                "D:/Productivities/projects/Spectral GAT/NY/adj_manhattan.npy",
-                "D:/Productivities/projects/Spectral GAT/SPGAT/Data/speed_19_Manhattan_5min_py36",
-                "D:/Productivities/projects/Spectral GAT/NY/Manhattan_FinalVersion.shp",
-                "D:/Productivities/projects/Spectral GAT/NY/TMC_FinalVersion.csv",
+                "/home/dachuan/Productivities/Spectral GAT/NY/adj_manhattan.npy",
+                "/home/dachuan/Productivities/Spectral GAT/SPGAT/Data/speed_19_Manhattan_5min_py36",
+                "/home/dachuan/Productivities/Spectral GAT/NY/Manhattan_FinalVersion.shp",
+                "/home/dachuan/Productivities/Spectral GAT/NY/TMC_FinalVersion.csv",
                 tod=cfg.get("time_of_day"),
                 dow=cfg.get("day_of_week"),
                 batch_size=cfg.get("batch_size", 64),

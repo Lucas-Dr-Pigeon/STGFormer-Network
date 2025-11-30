@@ -63,7 +63,7 @@ class TopoAugmentedQK(nn.Module):
         topo_dim: int,
         num_heads: int,
         topo_proj_dim: int = None,   # must equal model_dim for "add"
-        init_beta: float = 0.5,
+        init_beta: float = 0.05,
     ):
         super().__init__()
         assert model_dim % num_heads == 0, "model_dim must be divisible by num_heads"
@@ -108,7 +108,7 @@ class TopoAugmentedQK(nn.Module):
         Q = q_feat + scale * q_topo  # (B, T, N, C)
         K = k_feat + scale * k_topo  # (B, T, N, C)
         V = v_feat                   # (B, T, N, C)
-
+        # print (f"--q_feat mean {torch.mean(q_feat)}, q_topo mean {scale.item()*torch.mean(q_topo)}  k_feat mean {torch.mean(k_feat)}, k_topo mean {scale.item()*torch.mean(k_topo)} beta {scale.item()}---")
         return Q, K, V
 
 class FastAttentionLayer(nn.Module):
@@ -293,12 +293,15 @@ class SelfAttentionLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.scale = [1, 0.01, 0.001]
 
-    def forward(self, x, graph, z):
+    def forward(self, x, graph, z_topo):
         x_loc = self.locals(x, graph)
-        c = x_glo = x
-        for i, xl in enumerate(x_loc):
-            att_outputs = self.attn[i](xl, z)
-            x_glo += att_outputs * self.pws[i](c) * self.scale[i]
+        x_glo = x                       # start from x, but DON'T modify in-place
+        c = x
+        for i, x_l in enumerate(x_loc):
+            att_outputs = self.attn[i](x_l, z_topo)
+            # x_glo += att_outputs * self.pws[i](c) * self.scale[i]
+            gate = self.pws[i](c) * self.scale[i]
+            x_glo = x_glo + att_outputs * gate  # out-of-place
             c = att_outputs
         x = self.ln1(x + self.dropout(x_glo))
         x = self.ln2(x + self.dropout(self.fc(x)))
@@ -328,6 +331,7 @@ class TopoSTGformer(nn.Module):
         use_mixed_proj=True,
         dropout_a=0.3,
         kernel_size=[1],
+        order=2,
     ):
         super().__init__()
 
@@ -353,7 +357,7 @@ class TopoSTGformer(nn.Module):
         self.num_layers = num_layers
         self.use_mixed_proj = use_mixed_proj
 
-        self.z = topo_feature  # (N, K)
+        self.z = topo_feature / (topo_feature.norm(dim=1, keepdim=True) + 1e-6) # (N, K)
         self.topo_embedding_dim = topo_feature.shape[1]
 
         self.input_proj = nn.Linear(input_dim, input_embedding_dim)
@@ -379,6 +383,7 @@ class TopoSTGformer(nn.Module):
                     self.topo_embedding_dim,
                     kernel=size,
                     supports=supports,
+                    order=order,
                 )
                 for size in kernel_size
             ]
@@ -391,6 +396,7 @@ class TopoSTGformer(nn.Module):
         self.kernel_size = kernel_size[0]
 
         self.topology_encoder = MotifTopoEncoder(self.topo_embedding_dim)
+        self.topo_ln = nn.LayerNorm(self.topo_embedding_dim)
 
         self.encoder = nn.ModuleList(
             [
@@ -422,7 +428,7 @@ class TopoSTGformer(nn.Module):
         x = x[..., : self.input_dim]
 
         x = self.input_proj(x)  # (batch_size, in_steps, num_nodes, input_embedding_dim)
-        z_topo = self.topology_encoder(self.z) # z_topo is fixed
+        z_topo = self.topo_ln(self.topology_encoder(self.z)) # z_topo is fixed
         features = torch.tensor([]).to(x)
         if self.tod_embedding_dim > 0:
             tod_emb = self.tod_embedding(

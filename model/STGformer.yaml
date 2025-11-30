@@ -360,8 +360,8 @@ INRIX_MANHATTAN:
 
   lr: 0.001
   weight_decay: 0.0015
-  milestones: [30,60,90,120]
-  lr_decay_rate: 0.1
+  milestones: [20, 40, 60, 80, 100, 120, 140, 160, 180]
+  lr_decay_rate: 0.25
   batch_size: 32
   max_epochs: 200
   early_stop: 30
@@ -380,7 +380,7 @@ INRIX_MANHATTAN:
     tod_embedding_dim: 0
     dow_embedding_dim: 0
     adaptive_embedding_dim: 12
-    kernel_size: [1]
+    kernel_size: [1,1,1]
     num_heads: 4
     num_layers: 6
     dropout: 0.1

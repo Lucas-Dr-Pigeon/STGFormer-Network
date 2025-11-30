@@ -188,10 +188,13 @@ class SelfAttentionLayer(nn.Module):
 
     def forward(self, x, graph):
         x_loc = self.locals(x, graph)
-        c = x_glo = x
+        x_glo = x                       # start from x, but DON'T modify in-place
+        c = x
         for i, z in enumerate(x_loc):
             att_outputs = self.attn[i](z)
-            x_glo += att_outputs * self.pws[i](c) * self.scale[i]
+            # x_glo += att_outputs * self.pws[i](c) * self.scale[i]
+            gate = self.pws[i](c) * self.scale[i]
+            x_glo = x_glo + att_outputs * gate  # out-of-place
             c = att_outputs
         x = self.ln1(x + self.dropout(x_glo))
         x = self.ln2(x + self.dropout(self.fc(x)))
